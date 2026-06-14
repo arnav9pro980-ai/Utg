@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Score Master - Two Player Scorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 3em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .scoreboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .player {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .player.pulse {
+            animation: pulse-scale 0.6s ease-out;
+        }
+
+        @keyframes pulse-scale {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .player h2 {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .player:nth-child(1) h2 {
+            color: #667eea;
+        }
+
+        .player:nth-child(2) h2 {
+            color: #f093fb;
+        }
+
+        .score {
+            font-size: 4em;
+            font-weight: 700;
+            text-align: center;
+            margin: 30px 0;
+            color: #333;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .player:nth-child(1) .score {
+            color: #667eea;
+        }
+
+        .player:nth-child(2) .score {
+            color: #f093fb;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-minus {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .btn-minus:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255,107,107,0.4);
+        }
+
+        .btn-minus:active {
+            transform: translateY(0);
+        }
+
+        .btn-plus {
+            background: #51cf66;
+            color: white;
+        }
+
+        .btn-plus:hover {
+            background: #40c057;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(81,207,102,0.4);
+        }
+
+        .btn-plus:active {
+            transform: translateY(0);
+        }
+
+        .quick-add {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .quick-add button {
+            padding: 12px;
+            font-size: 0.9em;
+            background: #e7f5ff;
+            color: #667eea;
+            font-weight: 600;
+            border-radius: 10px;
+        }
+
+        .player:nth-child(2) .quick-add button {
+            background: #fff3f8;
+            color: #f093fb;
+        }
+
+        .quick-add button:hover {
+            background: #d0ebff;
+            transform: translateY(-1px);
+        }
+
+        .player:nth-child(2) .quick-add button:hover {
+            background: #ffe5f0;
+        }
+
+        .reset-section {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .btn-reset {
+            padding: 15px 40px;
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-reset:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+        }
+
+        .btn-reset:active {
+            transform: translateY(0);
+        }
+
+        .status {
+            text-align: center;
+            color: white;
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-top: 30px;
+            min-height: 40px;
+            text-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+        }
+
+        .status.show {
+            animation: fade-in 0.5s ease;
+        }
+
+        @keyframes fade-in {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .player {
+                padding: 30px 20px;
+            }
+
+            .score {
+                font-size: 3em;
+            }
+
+            .scoreboard {
+                gap: 20px;
+            }
+
+            button {
+                padding: 12px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎮 SCORE MASTER</h1>
+            <p>Two-Player Scoring with Sound Effects</p>
+        </div>
+
+        <div class="scoreboard">
+            <!-- Player 1 -->
+            <div class="player">
+                <h2>🎯 Player One</h2>
+                <div class="score" id="score1">0</div>
+                
+                <div class="controls">
+                    <button class="btn-minus" onclick="changeScore(1, -1)">−1</button>
+                    <button class="btn-plus" onclick="changeScore(1, 1)">+1</button>
+                </div>
+
+                <div class="quick-add">
+                    <button onclick="changeScore(1, 5)">+5</button>
+                    <button onclick="changeScore(1, 10)">+10</button>
+                    <button onclick="changeScore(1, -5)">−5</button>
+                    <button onclick="changeScore(1, -10)">−10</button>
+                </div>
+            </div>
+
+            <!-- Player 2 -->
+            <div class="player">
+                <h2>🎯 Player Two</h2>
+                <div class="score" id="score2">0</div>
+                
+                <div class="controls">
+                    <button class="btn-minus" onclick="changeScore(2, -1)">−1</button>
+                    <button class="btn-plus" onclick="changeScore(2, 1)">+1</button>
+                </div>
+
+                <div class="quick-add">
+                    <button onclick="changeScore(2, 5)">+5</button>
+                    <button onclick="changeScore(2, 10)">+10</button>
+                    <button onclick="changeScore(2, -5)">−5</button>
+                    <button onclick="changeScore(2, -10)">−10</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="reset-section">
+            <button class="btn-reset" onclick="resetScores()">Reset Game</button>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        let scores = {
+            1: 0,
+            2: 0
+        };
+
+        // Create audio context for generating sounds
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playSound(frequency, duration, type = 'plus') {
+            try {
+                const now = audioContext.currentTime;
+                const osc = audioContext.createOscillator();
+                const gain = audioContext.createGain();
+
+                osc.connect(gain);
+                gain.connect(audioContext.destination);
+
+                osc.frequency.value = frequency;
+                osc.type = 'sine';
+
+                if (type === 'plus') {
+                    // Rising tone for plus
+                    osc.frequency.setValueAtTime(frequency, now);
+                    osc.frequency.exponentialRampToValueAtTime(frequency * 1.5, now + duration);
+                } else {
+                    // Falling tone for minus
+                    osc.frequency.setValueAtTime(frequency, now);
+                    osc.frequency.exponentialRampToValueAtTime(frequency * 0.7, now + duration);
+                }
+
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+
+                osc.start(now);
+                osc.stop(now + duration);
+            } catch (e) {
+                console.log('Audio context suspended, click to enable');
+            }
+        }
+
+        function changeScore(player, points) {
+            const previousScore = scores[player];
+            scores[player] += points;
+
+            // Ensure score doesn't go below 0
+            if (scores[player] < 0) {
+                scores[player] = 0;
+            }
+
+            // Update display
+            document.getElementById(`score${player}`).textContent = scores[player];
+
+            // Pulse animation
+            document.querySelector(`.player:nth-child(${player})`).classList.add('pulse');
+            setTimeout(() => {
+                document.querySelector(`.player:nth-child(${player})`).classList.remove('pulse');
+            }, 600);
+
+            // Play sound
+            if (points > 0) {
+                playSound(400 + (points * 20), 0.2, 'plus');
+            } else {
+                playSound(400 + (Math.abs(points) * 20), 0.2, 'minus');
+            }
+
+            // Show status
+            showStatus(player, points);
+
+            // Check for winner
+            checkLeader();
+        }
+
+        function showStatus(player, points) {
+            const status = document.getElementById('status');
+            const playerName = player === 1 ? 'Player One' : 'Player Two';
+            const action = points > 0 ? `gained ${points} points!` : `lost ${Math.abs(points)} points!`;
+            
+            status.textContent = `${playerName} ${action}`;
+            status.classList.add('show');
+
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 2000);
+        }
+
+        function checkLeader() {
+            const status = document.getElementById('status');
+            if (scores[1] > scores[2] && scores[1] > 0) {
+                status.textContent = '🏆 Player One is leading!';
+                status.classList.add('show');
+            } else if (scores[2] > scores[1] && scores[2] > 0) {
+                status.textContent = '🏆 Player Two is leading!';
+                status.classList.add('show');
+            } else if (scores[1] === scores[2] && scores[1] > 0) {
+                status.textContent = '⚔️ It\'s a tie!';
+                status.classList.add('show');
+            }
+        }
+
+        function resetScores() {
+            scores = { 1: 0, 2: 0 };
+            document.getElementById('score1').textContent = '0';
+            document.getElementById('score2').textContent = '0';
+            
+            // Play reset sound
+            playSound(500, 0.3, 'plus');
+            
+            const status = document.getElementById('status');
+            status.textContent = '🔄 Game Reset!';
+            status.classList.add('show');
+            
+            setTimeout(() => {
+                status.classList.remove('show');
+            }, 2000);
+        }
+
+        // Resume audio context on first interaction
+        document.addEventListener('click', () => {
+            if (audioContext.state === 'suspended') {
+                audioContext.resume();
+            }
+        });
+    </script>
+</body>
+</html>
